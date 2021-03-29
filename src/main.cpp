@@ -18,16 +18,13 @@ class File_System;
 class DSP;
 class Stream;
 class Playlist;
-class Buffer;
 
 typedef struct{
     Playlist plist;
     Interface intf;
     DSP dsp;
     Stream str;
-    Buffer buf;
 } Player;
-
 
 int demo();
 int init_player(Player &p);
@@ -35,7 +32,8 @@ int main_loop(Player &p);
 
 typedef struct{
     int eq_values[12];
-    // Primero estructurar como realizar el DSP en si, luego proponer configuración 
+    // Primero estructurar como realizar el DSP en si, luego proponer configuración
+    // Possibly use ALSA's config module itself 
 } DSP_Config;
 
 int main(int argc, const char* argv[]) {
@@ -50,6 +48,7 @@ int main(int argc, const char* argv[]) {
 
     File_System fs;
     Player player;
+    player.str = Stream("default", NULL, NULL);
 
     init_player(player);
 
