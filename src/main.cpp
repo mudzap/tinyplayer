@@ -38,8 +38,10 @@ typedef struct{
 
 int main(int argc, const char* argv[]) {
 
-	printf("Hello!\n");
-	demo();
+#ifndef NDEBUG
+	printf("Starting tinyplayer\n");
+#endif
+	//demo();
 
     //INIT
     //Read cached stuff
@@ -100,7 +102,7 @@ int demo(void)
     snd_pcm_sframes_t frames;
     for (i = 0; i < sizeof(buffer); i++)
         buffer[i] = random() & 0xff;
-    if ((err = snd_pcm_open(&handle, device, SND_PCM_STREAM_PLAYBACK, 0)) < 0) {
+    if ((err = snd_pcm_open(&handle, DEVICE, SND_PCM_STREAM_PLAYBACK, 0)) < 0) {
         printf("Playback open error: %s\n", snd_strerror(err));
         exit(EXIT_FAILURE);
     }
