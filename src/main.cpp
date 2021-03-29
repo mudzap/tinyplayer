@@ -1,8 +1,14 @@
-#include<stdio.h>
-#include<math.h>
-#include<alsa/asoundlib.h>
-#include<curses.h>
-#include<
+#include <stdio.h>
+#include <math.h>
+#include <alsa/asoundlib.h>
+#include <curses.h>
+
+#include "playlist.h"
+#include "dsp.h"
+#include "stream.h"
+#include "buffer.h"
+#include "interface.h"
+#include "file_system.h"
 
 static char *device = "default";            /* playback device */
 unsigned char buffer[16*1024];              /* some random data */
@@ -43,7 +49,7 @@ int main(int argc, const char* argv[]) {
 
     File_System fs;
     Player player;
-    
+
     init_player(player);
 
     main_loop(player);
