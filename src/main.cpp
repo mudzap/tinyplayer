@@ -10,7 +10,7 @@
 #include "interface.h"
 #include "file_system.h"
 
-static char *device = "default";            /* playback device */
+static char *DEVICE = "default";            /* playback device */
 unsigned char buffer[16*1024];              /* some random data */
 
 class Interface;
@@ -48,9 +48,21 @@ int main(int argc, const char* argv[]) {
 
     File_System fs;
     Player player;
-    player.str = Stream("default", NULL, NULL);
+    player.str = Stream(DEVICE, NULL, NULL);
 
     init_player(player);
+
+
+    //Proposed pipeline:
+    /*
+    Phase:              Handled by:     Comments:
+
+    INPUT               Audio_Read      Read & Decode from file/playlist/etc...
+    PRE-PROCCESSING     Audio_Read      Transform into processable data (separate channels, give parameters)
+    DSP                 DSP             Process
+    OUTPUT              Stream          Output to speakers/etc...
+    */
+
 
     main_loop(player);
 

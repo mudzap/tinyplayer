@@ -20,7 +20,8 @@ class Stream {
         void* callback_data = NULL;
 
         const char* pcm_name = "Default_Name";
-        unsigned char buffer[16*1024];
+        unsigned char out_buffer[16*1024];
+        unsigned char in_buffer[16*1024];
 
     public:
 
