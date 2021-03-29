@@ -44,6 +44,8 @@
 
 class DSP {
 
+    unsigned char* buffer[16][1024];
+    
 };
 
 #endif
