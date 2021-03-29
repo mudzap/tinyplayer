@@ -13,10 +13,6 @@
 static char *device = "default";            /* playback device */
 unsigned char buffer[16*1024];              /* some random data */
 
-int demo();
-int init_player();
-int main_loop();
-
 class Interface;
 class File_System;
 class DSP;
@@ -24,7 +20,7 @@ class Stream;
 class Playlist;
 class Buffer;
 
-typedef struct Player{
+typedef struct{
     Playlist plist;
     Interface intf;
     DSP dsp;
@@ -32,10 +28,15 @@ typedef struct Player{
     Buffer buf;
 } Player;
 
-typedef struct DSP_Config{
+
+int demo();
+int init_player(Player &p);
+int main_loop(Player &p);
+
+typedef struct{
     int eq_values[12];
     // Primero estructurar como realizar el DSP en si, luego proponer configuración 
-}
+} DSP_Config;
 
 int main(int argc, const char* argv[]) {
 
@@ -62,16 +63,22 @@ int main(int argc, const char* argv[]) {
 
 }
 
-int init_player(Player &player) {
+int init_player(Player &p) {
 
-    player.intf->init();
+    //curses init
+    //player.intf->init();
+
+    return 0;
+
 }
 
-int main_loop(Player &player) {
+int main_loop(Player &p) {
 
-    player.buffer
+    //player.buf
+    //if(player.dsp->isActive)
 
-    if(player.dsp->isActive)
+    return 0;
+
 }
 
 int demo(void)
