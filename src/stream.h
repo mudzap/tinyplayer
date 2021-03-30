@@ -24,8 +24,7 @@ class Stream {
         snd_pcm_sw_params_t *sw_params;
 
         const char* pcm_name = NULL;
-        unsigned char out_buffer[16*1024];
-        unsigned char in_buffer[16*1024];
+        unsigned char stream_buffer[16*1024]; //Gets data from dsp
 
         snd_pcm_sframes_t buffer_size = 2048;
         snd_pcm_sframes_t period_size = 128;
