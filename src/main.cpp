@@ -29,6 +29,7 @@ typedef struct{
 int demo();
 int init_player(Player &p);
 int main_loop(Player &p);
+int clear_all(Player &p);
 
 typedef struct{
     int eq_values[12];
@@ -47,6 +48,9 @@ int main(int argc, const char* argv[]) {
     //No cached stuff? Make it
     //Must init the following:
 
+#ifndef NDEBUG
+	printf("Initializing\n");
+#endif
     File_System fs;
     Player player;
     player.str = Stream(DEVICE);
@@ -68,7 +72,12 @@ int main(int argc, const char* argv[]) {
     main_loop(player);
 
 
+#ifndef NDEBUG
+	printf("Terminating\n");
+#endif
+
     //EXIT
+    clear_all(player);
 
 	return 0;
 
@@ -86,6 +95,16 @@ int init_player(Player &p) {
 
 int main_loop(Player &p) {
 
+    //player.buf
+    //if(player.dsp->isActive)
+
+    return 0;
+
+}
+
+int clear_all(Player &p) {
+
+    p.str.free_resources();
     //player.buf
     //if(player.dsp->isActive)
 
