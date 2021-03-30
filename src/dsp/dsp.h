@@ -1,16 +1,6 @@
 #ifndef _DSP_
 #define _DSP_
 
-#include "crossfade.h"
-#include "downmix.h"
-#include "audio_func.h"
-#include "fade.h"
-#include "gain.h"
-#include "hp.h"
-#include "lp.h"
-#include "lr_bal.h"
-#include "eq.h"
-
 /* Proposal:
 
     DSP should be configurable in multiple steps:
@@ -63,12 +53,54 @@
     it provides the possibility for initialization (i.e: precomputation) of the filter.
 */
 
+#include "crossfade.h"
+#include "downmix.h"
+#include "fade.h"
+#include "gain.h"
+#include "hp.h"
+#include "lp.h"
+#include "lr_bal.h"
+#include "eq.h"
+
+#include <vector>
+#include <array>
+#include <memory>
+
+#define DSP_INVALID_FILTER -1
+
+typedef enum Filter_Type{
+    DSP_LOW_PASS,
+    DSP_HIGH_PASS,
+    DSP_EQ,
+    DSP_DOWNMIX,
+    DSP_GAIN,
+    DSP_LR_BALANCE,
+    DSP_XFADE,
+    DSP_NO_FILTER
+} Filter_Type;
+
+typedef struct Filter_Op{
+    Filter_Type type = DSP_NO_FILTER;
+    std::shared_ptr<void> filter_ptr;
+    std::vector<int> buffer;
+
+    Filter_Op(Filter_Type init_type) :
+        type(init_type) {}
+
+} Filter_Op;
+
 class DSP {
 
+    public:
+
+        DSP();
+
+        int add_filter(Filter_Type type, int* data);
 
     private:
         
-        unsigned char* dsp_buffer[16][1024]; //Contains data from input
+        //std::vector<int*> dsp_buffers[MAX_FILTERS]; //Contains data from input
+        std::vector<Filter_Op> filters; //why is stl so ugly
 
 };
 

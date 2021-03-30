@@ -1,7 +1,9 @@
 #ifndef _HI_PASS_
 #define _HI_PASS_
 
-class HP {
+#include "audio_func.h"
+
+class HP : public Audio_Func {
 
     public:
         

@@ -1,13 +1,60 @@
 #ifndef _AUDIO_FUNC_
 #define _AUDIO_FUNC_
 
-//Implements a general operator for audio signals
+#include <math.h>
+
+/*
+Implements a inheritable function which implements:
+    A bi-quad filter (For IIR filters, direct form I)
+        Direct form I is utilized since no additional buffer is required.
+    A symmetric/antisymmetric form FIR filter
+        For similar reasons as above, and as to reduce computational time.
+
+Considerations:
+    What if cascading filters is desired?
+        Then the function object itself must contain a buffer
+    What is the required buffer size?
+        The number of taps
+    What if there are discrepancies between buffer sizes?
+        Inherit from the next filter OR
+        Use two buffers per filter
+    
+Many buffers are necessary for it to work as a pipeline
+
+IN      F1          F2          OUT
+b_out   b_in b_out  b_in b_out  b_in
+{   1      } {     2   } {    3    }
+
+What if instead, output and input buffers share the same memory space while keeping
+track of the number of required elements?
+
+For this reason, a number of buffers will be implemented in the DSP class itself,
+which represents the DSP pipeline
+
+Decimation should also be implemented for FIR (maybe?)
+*/
+
 
 class Audio_Func {
 
     public:
+
+        Audio_Func();
         
-        int operator() (int* data);
+        int operator() (int* data_in, int batch_size) {
+
+
+        }
+
+        int operator() (int* data_in, int* data_out, int batch_size) {
+
+
+        }
+
+        int in_coeffs = 1;
+        int out_coeffs = 1;
+
+    private:
 
 };
 

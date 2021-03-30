@@ -1,7 +1,9 @@
 #ifndef _DOWNMIX_
 #define _DOWNMIX_
 
-class Downmix {
+#include "audio_func.h"
+
+class Downmix : public Audio_Func {
 
     public:
         

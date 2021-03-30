@@ -19,7 +19,7 @@ class DSP;
 class Stream;
 class Playlist;
 
-typedef struct{
+typedef struct Player{
     Playlist plist;
     Interface intf;
     DSP dsp;

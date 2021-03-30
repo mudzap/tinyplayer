@@ -1,7 +1,9 @@
 #ifndef _LOW_PASS_
 #define _LOW_PASS_
 
-class LP {
+#include "audio_func.h"
+
+class LP : public Audio_Func {
 
     public:
         

@@ -1,7 +1,9 @@
 #ifndef _FADE_
 #define _FADE_
 
-class Fade {
+#include "audio_func.h"
+
+class Fade : public Audio_Func {
 
     public:
         

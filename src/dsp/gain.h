@@ -1,7 +1,9 @@
 #ifndef _GAIN_
 #define _GAIN_
 
-class Gain {
+#include "audio_func.h"
+
+class Gain : public Audio_Func {
 
     public:
         

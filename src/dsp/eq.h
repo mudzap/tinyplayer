@@ -1,7 +1,11 @@
 #ifndef _EQUALIZER_
 #define _EQUALIZER_
 
-class Equalizer {
+//This is just a lot of biquad filters
+
+#include "audio_func.h"
+
+class Equalizer : public Audio_Func {
 
     public:
         

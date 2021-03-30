@@ -1,7 +1,9 @@
 #ifndef _LR_BALANCE_
 #define _LR_BALANCE_
 
-class LR_Balance {
+#include "audio_func.h"
+
+class LR_Balance : public Audio_Func {
 
     public:
         
