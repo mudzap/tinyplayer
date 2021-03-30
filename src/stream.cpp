@@ -1,63 +1,34 @@
 #include "stream.h"
 
-snd_pcm_sframes_t Stream::buffer_size = 10;
-snd_pcm_sframes_t Stream::period_size = 10;
-
 Stream::Stream() {
     //Do nothing
 }
 
-Stream::Stream(const char* name,
-            snd_async_callback_t callback,
-            void* data) {
-    //setup_pcm(name, callback, data);
-    setup_pcm(name, Stream::async_write_callback, data);
+Stream::Stream(const char* name) :
+    pcm_name(name) {
+
+    setup_pcm(name);
     setup_hwparams();
+}   
+
+Stream::~Stream() {
+    snd_pcm_close (pcm_handle);
 }
 
-void Stream::setup_pcm(const char* name,
-            snd_async_callback_t callback,
-            void* data) {
-
-    pcm_name = name;
-    //async_callback = callback;
-    async_callback = Stream::async_write_callback;
-    callback_data = data;
+void Stream::setup_pcm(const char* name) {
 
 #ifndef NDEBUG
     printf("Setting up stream with name: %s\n", name);
 #endif
 
     int err;
-
-    err = snd_pcm_open(
-        &pcm_handle,
-        name,
-        SND_PCM_STREAM_PLAYBACK,
-        SND_PCM_ASYNC
-        );
-    
+    err = snd_pcm_open(&pcm_handle, name, SND_PCM_STREAM_PLAYBACK, 0);
 
     if(err < 0) {
         printf("Failed to open pcm channel, error: %s\n", snd_strerror(err));
         exit(EXIT_FAILURE);
     }
 
-#ifndef NDEBUG
-    printf("Setting up callback function\n");
-#endif
-
-    err = snd_async_add_pcm_handler(
-        async_handler,
-	    pcm_handle,
-	    callback,
-	    data 
-	);
-
-    if(err < 0) {
-        printf("Failed to setup callback for async handler, error: %s\n", snd_strerror(err));
-        exit(EXIT_FAILURE);
-    }
 }
 
 int Stream::setup_hwparams() {
@@ -70,23 +41,41 @@ int Stream::setup_hwparams() {
 #ifndef NDEBUG
     printf("Getting hw_params\n");
 #endif
+
+    err = snd_pcm_hw_params_malloc (&hw_params);
+
+    if (err < 0) {
+        printf("Failed to allocate memory for he_params error: %s\n", snd_strerror(err));
+        return err;
+    }
+
     err = snd_pcm_hw_params_any(pcm_handle, hw_params);
+
     if (err < 0) {
         printf("Broken configuration for playback: no configurations available: %s\n", snd_strerror(err));
         return err;
     }
 
 #ifndef NDEBUG
-    printf("Got: hw_params - %x\n", hw_params);
-    //printf("Got: hw_params\n");
-#endif
+    printf("Got:\n");
+    unsigned int num, den;
+    snd_pcm_hw_params_get_rate_numden(hw_params, &num, &den); 
+    printf("\tRatio:\t\t%u/%u\n",num, den);
+    printf("\tBit Depth:\t%u\n",snd_pcm_hw_params_get_sbits(hw_params));
+    printf("\tFIFO Size:\t%u\n",snd_pcm_hw_params_get_fifo_size(hw_params));
+    unsigned int min_ch, max_ch, n_ch;
+    snd_pcm_hw_params_get_channels(hw_params, &n_ch);
+    snd_pcm_hw_params_get_channels_max(hw_params, &max_ch);
+    snd_pcm_hw_params_get_channels_min(hw_params, &min_ch);
+    printf("\tMinMax Ch.:\t%u\t%u\t%u\n",min_ch, n_ch, max_ch);
 
+#endif
 
 #ifndef NDEBUG
     printf("Setting hardware resampling\n");
 #endif
-    /* set hardware resampling */
-    //err = snd_pcm_hw_params_set_rate_resample(pcm_handle, params, resample);
+
+    err = snd_pcm_hw_params_set_rate_resample(pcm_handle, hw_params, rate);
     if (err < 0) {
         printf("Resampling setup failed for playback: %s\n", snd_strerror(err));
         return err;
@@ -156,34 +145,148 @@ int Stream::setup_hwparams() {
 }
             
 
-void Stream::write_frame_i() {
 
+//Underrun and suspend recovery
+
+int Stream::xrun_recovery(snd_pcm_t *handle, int err)
+{
+    
+#ifndef NDEBUG
+    printf("stream recovery\n");
+#endif
+
+    if (err == -EPIPE) {    // under-run
+        err = snd_pcm_prepare(handle);
+        if (err < 0)
+            printf("Can't recovery from underrun, prepare failed: %s\n", snd_strerror(err));
+        return 0;
+    } else if (err == -ESTRPIPE) {
+        while ((err = snd_pcm_resume(handle)) == -EAGAIN)
+            sleep(1);   // wait until the suspend flag is released 
+        if (err < 0) {
+            err = snd_pcm_prepare(handle);
+            if (err < 0)
+                printf("Can't recovery from suspend, prepare failed: %s\n", snd_strerror(err));
+        }
+        return 0;
+    }
+    return err;
 }
 
-//Use asynchronous notification transfer method from {ALSA}/tests/pcm.c
+//Use write and wait for room in buffer using poll transfer method from {ALSA}/tests/pcm.c
 
-void Stream::async_write_callback(snd_async_handler_t *async_handler) {
-    //Needed, fuck you C++
-    snd_pcm_t *pcm_handle = snd_async_handler_get_pcm(async_handler);
+int Stream::wait_for_poll(snd_pcm_t *handle, pollfd *ufds, unsigned int count) {
+    unsigned short revents;
+    while (1) {
+        poll(ufds, count, -1);
+        snd_pcm_poll_descriptors_revents(handle, ufds, count, &revents);
+        if (revents & POLLERR)
+            return -EIO;
+        if (revents & POLLOUT)
+            return 0;
+    }
+}
 
-    async_private_data *data = static_cast<async_private_data*>(snd_async_handler_get_callback_private(async_handler));
-    signed short *samples = data->samples;
-    snd_pcm_channel_area_t *areas = data->areas;
-    snd_pcm_sframes_t avail;
-    int err;
-    
-    avail = snd_pcm_avail_update(pcm_handle);
-    while (avail >= Stream::period_size) {
-        //generate_sine(areas, 0, period_size, &data->phase);
-        err = snd_pcm_writei(pcm_handle, samples, Stream::period_size);
-        if (err < 0) {
-            printf("Write error: %s\n", snd_strerror(err));
-            exit(EXIT_FAILURE);
+int Stream::write_and_poll_loop(snd_pcm_t *handle,
+                   signed short *samples,
+                   snd_pcm_channel_area_t *areas) {
+
+    pollfd *ufds;
+    signed short *ptr;
+
+    int err, count, cptr, init;
+    count = snd_pcm_poll_descriptors_count (handle);
+    if (count <= 0) {
+        printf("Invalid poll descriptors count\n");
+        return count;
+    }
+
+    ufds = new pollfd[count];
+    if (ufds == NULL) {
+        printf("No enough memory\n");
+        return -ENOMEM;
+    }
+
+    if ((err = snd_pcm_poll_descriptors(handle, ufds, count)) < 0) {
+        printf("Unable to obtain poll descriptors for playback: %s\n", snd_strerror(err));
+        return err;
+    }
+
+    init = 1;
+    while (1) {
+
+        if (!init) {
+            
+            err = wait_for_poll(handle, ufds, count);
+            if (err < 0) {
+
+                if (snd_pcm_state(handle) == SND_PCM_STATE_XRUN ||
+                    snd_pcm_state(handle) == SND_PCM_STATE_SUSPENDED) {
+
+                    err = snd_pcm_state(handle) == SND_PCM_STATE_XRUN ? -EPIPE : -ESTRPIPE;
+                    if (xrun_recovery(handle, err) < 0) {
+                        printf("Write error: %s\n", snd_strerror(err));
+                        exit(EXIT_FAILURE);
+                    }
+                    init = 1;
+
+                } else {
+                    printf("Wait for poll failed\n");
+                    return err;
+                }
+            }
         }
-        if (err != Stream::period_size) {
-            printf("Write error: written %i expected %li\n", err, Stream::period_size);
-            exit(EXIT_FAILURE);
+
+        //generate_sine(areas, 0, period_size, &phase);
+        ptr = samples;
+        cptr = period_size;
+
+        while (cptr > 0) {
+
+            err = snd_pcm_writei(handle, ptr, cptr);
+            if (err < 0) {
+
+                if (xrun_recovery(handle, err) < 0) {
+                    printf("Write error: %s\n", snd_strerror(err));
+                    exit(EXIT_FAILURE);
+                }
+                init = 1;
+                break;  // skip one period 
+
+            }
+
+            if (snd_pcm_state(handle) == SND_PCM_STATE_RUNNING)
+                init = 0;
+
+            ptr += err * channels;
+            cptr -= err;
+
+            if (cptr == 0)
+                break;
+            
+            // it is possible, that the initial buffer cannot store
+            // all data from the last period, so wait awhile 
+            err = wait_for_poll(handle, ufds, count);
+            if (err < 0) {
+                if (snd_pcm_state(handle) == SND_PCM_STATE_XRUN ||
+                    snd_pcm_state(handle) == SND_PCM_STATE_SUSPENDED) {
+
+                    err = snd_pcm_state(handle) == SND_PCM_STATE_XRUN ? -EPIPE : -ESTRPIPE;
+
+                    if (xrun_recovery(handle, err) < 0) {
+                        printf("Write error: %s\n", snd_strerror(err));
+                        exit(EXIT_FAILURE);
+                    }
+
+                    init = 1;
+
+                } else {
+                    printf("Wait for poll failed\n");
+                    return err;
+                }
+            }
+
         }
-        avail = snd_pcm_avail_update(pcm_handle);
+
     }
 }

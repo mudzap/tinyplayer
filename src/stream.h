@@ -1,56 +1,50 @@
 #ifndef _STREAM_
 #define _STREAM_
 
-#define RATE        44100
-#define CHANNELS    2
-
 #include <iostream>
 #include <alsa/asoundlib.h>
+
+#include <poll.h>
 #include "buffer.h"
 
-//Use asynchronous notification transfer method from {ALSA}/tests/pcm.c
-
-typedef struct {
-    signed short *samples;
-    snd_pcm_channel_area_t *areas; /*Area contains: Address, offset and step (addr, first, step)*/
-} async_private_data;
-
+typedef struct pollfd pollfd;
 
 class Stream {
 
     public:
 
         Stream();
-        Stream(const char* name, snd_async_callback_t callback, void* data);
+        Stream(const char* name);
+        ~Stream();
 
     private:
 
-        snd_async_handler_t** async_handler = NULL;
-        snd_pcm_t* pcm_handle = NULL;
-        snd_async_callback_t async_callback = NULL;
-        void* callback_data = NULL;
+        snd_pcm_t* pcm_handle;
 
         snd_pcm_hw_params_t *hw_params;
 
-        const char* pcm_name = "Default_Name";
+        const char* pcm_name = NULL;
         unsigned char out_buffer[16*1024];
         unsigned char in_buffer[16*1024];
 
-        static snd_pcm_sframes_t buffer_size;
-        static snd_pcm_sframes_t period_size;
+        snd_pcm_sframes_t buffer_size = 1024;
+        snd_pcm_sframes_t period_size = 64;
+        int rate = 44100;
+        int channels = 2;
 
-        static void async_write_callback(snd_async_handler_t *async_handler);
 
     public:
 
-        bool failure = false;
-        snd_pcm_state_t get_state();
-        void write_frame_i();
-
-        void setup_pcm(const char* name,
-            snd_async_callback_t callback,
-            void* data);
+        void setup_all();
+        void setup_pcm(const char* name);
         int setup_hwparams();
+
+        int wait_for_poll(snd_pcm_t *handle, pollfd *ufds, unsigned int count);
+        int write_and_poll_loop(snd_pcm_t *handle,
+                   signed short *samples,
+                   snd_pcm_channel_area_t *areas);
+        int xrun_recovery(snd_pcm_t *handle, int err);
+        
 
 };
 
