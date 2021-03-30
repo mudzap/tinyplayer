@@ -42,7 +42,7 @@ int Stream::setup_hwparams() {
     printf("Getting hw_params\n");
 #endif
 
-    err = snd_pcm_hw_params_malloc (&hw_params);
+    err = snd_pcm_hw_params_malloc(&hw_params);
 
     if (err < 0) {
         printf("Failed to allocate memory for he_params error: %s\n", snd_strerror(err));
@@ -57,62 +57,83 @@ int Stream::setup_hwparams() {
     }
 
 #ifndef NDEBUG
-    printf("Got:\n");
+    //Add afterwards to a function
+    printf("Got device name: %s\n", pcm_name);
     unsigned int num, den;
     snd_pcm_hw_params_get_rate_numden(hw_params, &num, &den); 
     printf("\tRatio:\t\t%u/%u\n",num, den);
-    printf("\tBit Depth:\t%u\n",snd_pcm_hw_params_get_sbits(hw_params));
+    printf("\tBit Depth:\t%d\n",snd_pcm_hw_params_get_sbits(hw_params));
     printf("\tFIFO Size:\t%u\n",snd_pcm_hw_params_get_fifo_size(hw_params));
     unsigned int min_ch, max_ch, n_ch;
     snd_pcm_hw_params_get_channels(hw_params, &n_ch);
     snd_pcm_hw_params_get_channels_max(hw_params, &max_ch);
     snd_pcm_hw_params_get_channels_min(hw_params, &min_ch);
     printf("\tMinMax Ch.:\t%u\t%u\t%u\n",min_ch, n_ch, max_ch);
+    unsigned int min_r, max_r, n_r;
+    int min_d, max_d, n_d;
+    snd_pcm_hw_params_get_rate(hw_params, &n_r, &n_d);
+    snd_pcm_hw_params_get_rate_max(hw_params, &max_r, &max_d);
+    snd_pcm_hw_params_get_rate_min(hw_params, &min_r, &min_d);
+    printf("\tMinMax Rate:\t%u\t%u\t%u\n",min_r, n_r, max_r);
 
 #endif
 
 #ifndef NDEBUG
     printf("Setting hardware resampling\n");
 #endif
-
     err = snd_pcm_hw_params_set_rate_resample(pcm_handle, hw_params, rate);
     if (err < 0) {
         printf("Resampling setup failed for playback: %s\n", snd_strerror(err));
         return err;
     }
-    /* set the interleaved read/write format */
-    //err = snd_pcm_hw_params_set_access(pcm_handle, params, access);
+
+#ifndef NDEBUG
+    printf("Setting interleaved read/write format\n");
+#endif
+    err = snd_pcm_hw_params_set_access(pcm_handle, hw_params, access);
     if (err < 0) {
         printf("Access type not available for playback: %s\n", snd_strerror(err));
         return err;
     }
-    /* set the sample format */
-    //err = snd_pcm_hw_params_set_format(pcm_handle, params, format);
+
+#ifndef NDEBUG
+    printf("Setting sample format\n");
+#endif
+    err = snd_pcm_hw_params_set_format(pcm_handle, hw_params, format);
     if (err < 0) {
         printf("Sample format not available for playback: %s\n", snd_strerror(err));
         return err;
     }
-    /* set the count of channels */
-    //err = snd_pcm_hw_params_set_channels(pcm_handle, params, channels);
+
+#ifndef NDEBUG
+    printf("Setting number of channels\n");
+#endif
+    err = snd_pcm_hw_params_set_channels(pcm_handle, hw_params, channels);
     if (err < 0) {
-        //printf("Channels count (%u) not available for playbacks: %s\n", channels, snd_strerror(err));
+        printf("Channels count (%u) not available for playbacks: %s\n", channels, snd_strerror(err));
         return err;
     }
-    /* set the stream rate */
-    //rrate = rate;
-    //err = snd_pcm_hw_params_set_rate_near(pcm_handle, params, &rrate, 0);
+
+#ifndef NDEBUG
+    printf("Setting stream rate\n");
+#endif
+    rrate = rate;
+    err = snd_pcm_hw_params_set_rate_near(pcm_handle, hw_params, &rrate, 0);
     if (err < 0) {
-        //printf("Rate %uHz not available for playback: %s\n", rate, snd_strerror(err));
+        printf("Rate %uHz not available for playback: %s\n", rate, snd_strerror(err));
         return err;
     }
-    /*if (rrate != rate) {
+    if (rrate != rate) {
         printf("Rate doesn't match (requested %uHz, get %iHz)\n", rate, err);
         return -EINVAL;
-    }*/
-    /* set the buffer time */
-    //err = snd_pcm_hw_params_set_buffer_time_near(handle, params, &buffer_time, &dir);
+    }
+
+#ifndef NDEBUG
+    printf("Setting buffer time\n");
+#endif  
+    err = snd_pcm_hw_params_set_buffer_time_near(pcm_handle, hw_params, &buffer_time, &dir);
     if (err < 0) {
-        //printf("Unable to set buffer time %u for playback: %s\n", buffer_time, snd_strerror(err));
+        printf("Unable to set buffer time %u for playback: %s\n", buffer_time, snd_strerror(err));
         return err;
     }
     err = snd_pcm_hw_params_get_buffer_size(hw_params, &size);
@@ -121,10 +142,13 @@ int Stream::setup_hwparams() {
         return err;
     }
     buffer_size = size;
-    /* set the period time */
-    //err = snd_pcm_hw_params_set_period_time_near(handle, params, &period_time, &dir);
+
+#ifndef NDEBUG
+    printf("Setting period time\n");
+#endif  
+    err = snd_pcm_hw_params_set_period_time_near(pcm_handle, hw_params, &period_time, &dir);
     if (err < 0) {
-        //printf("Unable to set period time %u for playback: %s\n", period_time, snd_strerror(err));
+        printf("Unable to set period time %u for playback: %s\n", period_time, snd_strerror(err));
         return err;
     }
     err = snd_pcm_hw_params_get_period_size(hw_params, &size, &dir);
@@ -133,7 +157,10 @@ int Stream::setup_hwparams() {
         return err;
     }
     period_size = size;
-    /* write the parameters to device */
+
+#ifndef NDEBUG
+    printf("Writing hardware parameters\n");
+#endif 
     err = snd_pcm_hw_params(pcm_handle, hw_params);
     if (err < 0) {
         printf("Unable to set hw params for playback: %s\n", snd_strerror(err));
@@ -143,7 +170,6 @@ int Stream::setup_hwparams() {
     return 0;
 
 }
-            
 
 
 //Underrun and suspend recovery
