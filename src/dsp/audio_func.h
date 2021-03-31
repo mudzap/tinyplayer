@@ -8,6 +8,8 @@
 Implements a inheritable function which implements:
     A bi-quad filter (For IIR filters, direct form I)
         Direct form I is utilized since no additional buffer is required.
+
+        (maybe FIR?)
     A symmetric/antisymmetric form FIR filter
         For similar reasons as above, and as to reduce computational time.
 
@@ -34,14 +36,11 @@ but for single core purposes, sharing the buffers is better
 
 For this reason, a number of buffers will be implemented in the DSP class itself,
 which represents the DSP pipeline
-
-Decimation should also be implemented for FIR (maybe?)
 */
 
 #define BATCH_SIZE 64
 
 
-typedef std::array<double, BATCH_SIZE> pcm_array;
 
 class Audio_Func {
 
@@ -49,21 +48,16 @@ class Audio_Func {
 
         Audio_Func();
         
-        int operator() (double* data_in, int batch_size) {
+        /* Not needed, being overloaded anyways
+        int operator() (double* data_in);
+        int operator() (double* data_in, double* data_out);
+        */
 
-
-        }
-
-        int operator() (double* data_in, double* data_out, int batch_size) {
-
-
-        }
-
-        pcm_array data_in[BATCH_SIZE];
-        pcm_array data_out[BATCH_SIZE];
+        std::array<double, BATCH_SIZE> buf_in;
+        std::array<double, BATCH_SIZE> buf_out;
 
         int in_coeffs = 1;
-        int out_coeffs = 1;
+        int out_coeffs = 0;
 
         /*
         double* get_data_in_ptr() {

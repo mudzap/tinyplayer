@@ -25,17 +25,16 @@ class Biquad: public Audio_Func {
         
         //THESE ARE MOSTLY PRECOMPUTATIONS, DO NOT OPTIMIZE
         //https://webaudio.github.io/Audio-EQ-Cookbook/audio-eq-cookbook.html
-
+        Biquad();
         Biquad(Biquad_Type type, double cutoff_freq, double sampling_freq, double Q, double db_gain = 0.0);
+
+        int compute_vars(double cutoff_freq, double sampling_freq, double Q, double db_gain = 0.0);
 
         int operator() (double* data_in, double* data_out);
 
     private:
-
-        int compute_vars(double cutoff_freq, double sampling_freq, double Q, double db_gain);
-
-        //b_0, b_1, b_2, a_0, a_1, a_2
-        double coeffs[6];
+        //b_0, b_1, b_2, a_1, a_2
+        double coeffs[5];
 
         //params for precomputing
         double A;
@@ -45,6 +44,10 @@ class Biquad: public Audio_Func {
         double cos_w_0;
         double sin_w_0;
         double a;
+
+        //delayed signals
+        double x_1, x_2 = 0;    //x[n-1], x[n-2]
+        double y_1, y_2 = 0;    //y[n-1], y[n-2]
 
 };
 
