@@ -7,8 +7,8 @@ class LR_Balance : public Audio_Func {
 
     public:
         
-        LR_Balance(int angle);
-        int operator() (int* data);
+        LR_Balance(double angle);
+        int operator() (double* data);
 
     private:
 

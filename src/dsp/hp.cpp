@@ -1,5 +1,5 @@
 #include "hp.h"
 
-HP::HP(int cutoff_freq, int sampling_freq){
-    
+HP::HP(double cutoff_freq, double sampling_freq){
+
 }

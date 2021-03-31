@@ -51,6 +51,17 @@
     Function objects are a possiblity, however they can't be stored in the same array, however
     an array of pointers to function objects and their type can be stored. This is useful because
     it provides the possibility for initialization (i.e: precomputation) of the filter.
+
+    As for data conversion, consider:
+    Int -> float -> Int
+    This is not ideal
+
+    ALSA, however, supports a float(both 32 and 64 bit) format, so only an initial conversion is required
+    Filters will utilize double float precision, the output can be casted easily to a cast at the output.
+
+    32768
+
+    Lastly, all this should be done in a batched form, as to avoid excessive memory transfers
 */
 
 #include "crossfade.h"
@@ -95,7 +106,7 @@ class DSP {
 
         DSP();
 
-        int add_filter(Filter_Type type, int* data);
+        int add_filter(Filter_Type type, double* data);
 
     private:
         

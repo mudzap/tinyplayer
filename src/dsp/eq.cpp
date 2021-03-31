@@ -1,5 +1,5 @@
 #include "eq.h"
 
-Equalizer::Equalizer(int* values_db) {
-    
+Equalizer::Equalizer(double* values_db) {
+
 }

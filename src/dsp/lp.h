@@ -7,12 +7,12 @@ class LP : public Audio_Func {
 
     public:
         
-        LP(int cutoff_freq, int sampling_freq);
-        int operator() (int* data);
+        LP(double cutoff_freq, double sampling_freq);
+        int operator() (double* data);
 
     private:
 
-        int* filter_params;
+        double* filter_params;
 
 };
 

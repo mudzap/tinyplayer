@@ -7,8 +7,8 @@ class Fade : public Audio_Func {
 
     public:
         
-        Fade(int fade_in_ms, int fade_out_ms, int fade_db);
-        int operator() (int* data);
+        Fade(int fade_in_ms, int fade_out_ms, double fade_db);
+        int operator() (double* data);
 
     private:
 

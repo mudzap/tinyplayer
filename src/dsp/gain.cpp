@@ -1,5 +1,5 @@
 #include "gain.h"
 
-Gain::Gain(int gain_db) {
-    
+Gain::Gain(double gain_db) {
+
 }

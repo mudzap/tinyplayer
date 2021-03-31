@@ -21,8 +21,8 @@ class XFade : public Audio_Func {
 
     public:
         
-        XFade(int gain_db);
-        int operator() (int* data);
+        XFade(double gain_db);
+        int operator() (double* data);
 
     private:
 

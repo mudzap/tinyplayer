@@ -31,6 +31,12 @@ class Stream {
         int rate = 44100;
         int channels = 2;
         snd_pcm_format_t format = SND_PCM_FORMAT_S16;
+        
+        /* 
+        SND_PCM_FORMAT_FLOAT 	Float 32 bit CPU endian
+        SND_PCM_FORMAT_FLOAT64  Float 64 bit CPU endian 
+        */
+
         unsigned int buffer_time = 500000; //in us
         unsigned int period_time = 100000;  
         snd_pcm_access_t access = SND_PCM_ACCESS_RW_INTERLEAVED;

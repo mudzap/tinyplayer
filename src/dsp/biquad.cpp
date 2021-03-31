@@ -1,7 +1,7 @@
 #include "biquad.h"
 
 
-Biquad::Biquad(Biquad_Type type, int cutoff_freq, int sampling_freq, double Q, double db_gain){
+Biquad::Biquad(Biquad_Type type, double cutoff_freq, double sampling_freq, double Q, double db_gain){
 
     compute_vars(cutoff_freq, sampling_freq, Q, db_gain);
 
@@ -25,7 +25,7 @@ Biquad::Biquad(Biquad_Type type, int cutoff_freq, int sampling_freq, double Q, d
             coeffs[5] = 1.0 - a;
             break;
 
-        case BQ_BPF_0DB:
+        case BQ_BPF_0DB: //Band pass with maximum gain of 0dB
             coeffs[0] = a;
             coeffs[1] = 0.0;
             coeffs[2] = -a;
@@ -91,12 +91,12 @@ Biquad::Biquad(Biquad_Type type, int cutoff_freq, int sampling_freq, double Q, d
     }
 }
 
-int Biquad::compute_vars(int cutoff_freq, int sampling_freq, double Q, double db_gain) {
+int Biquad::compute_vars(double cutoff_freq, double sampling_freq, double Q, double db_gain) {
     double A = pow(10.f, db_gain/40.f);
     double f_0 = cutoff_freq;
     double F_s = sampling_freq;
     double w_0 = 2*PI*f_0/F_s;
     double cos_w_0 = cos(w_0);
     double sin_w_0 = sin(w_0);
-    double a = sin_w_0 / (2 * _Q_);
+    double a = sin_w_0 / (2 * Q);
 }

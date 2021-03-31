@@ -8,7 +8,7 @@ class Downmix : public Audio_Func {
     public:
         
         Downmix();
-        int operator() (int* data);
+        int operator() (double* data);
 
     private:
 

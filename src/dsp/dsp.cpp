@@ -3,7 +3,7 @@
 DSP::DSP() {
 }
 
-int DSP::add_filter(Filter_Type type, int* data) {
+int DSP::add_filter(Filter_Type type, double* data) {
 
     //if(filters.size >= MAX_FILTERS)
 

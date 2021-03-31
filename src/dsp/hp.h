@@ -9,12 +9,12 @@ class HP : public Audio_Func {
 
     public:
         
-        HP(int cutoff_freq, int sampling_freq);
-        int operator() (int* data);
+        HP(double cutoff_freq, double sampling_freq);
+        int operator() (double* data);
 
     private:
 
-        int* filter_params;
+        double* filter_params;
 
 };
 

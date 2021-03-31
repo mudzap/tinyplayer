@@ -2,6 +2,7 @@
 #define _AUDIO_FUNC_
 
 #include <math.h>
+#include <array>
 
 /*
 Implements a inheritable function which implements:
@@ -28,12 +29,19 @@ b_out   b_in b_out  b_in b_out  b_in
 What if instead, output and input buffers share the same memory space while keeping
 track of the number of required elements?
 
+Using two buffers per filter however, would result in a more efficient parallel pipeline
+but for single core purposes, sharing the buffers is better
+
 For this reason, a number of buffers will be implemented in the DSP class itself,
 which represents the DSP pipeline
 
 Decimation should also be implemented for FIR (maybe?)
 */
 
+#define BATCH_SIZE 64
+
+
+typedef std::array<double, BATCH_SIZE> pcm_array;
 
 class Audio_Func {
 
@@ -41,20 +49,31 @@ class Audio_Func {
 
         Audio_Func();
         
-        int operator() (int* data_in, int batch_size) {
+        int operator() (double* data_in, int batch_size) {
 
 
         }
 
-        int operator() (int* data_in, int* data_out, int batch_size) {
+        int operator() (double* data_in, double* data_out, int batch_size) {
 
 
         }
+
+        pcm_array data_in[BATCH_SIZE];
+        pcm_array data_out[BATCH_SIZE];
 
         int in_coeffs = 1;
         int out_coeffs = 1;
 
-    private:
+        /*
+        double* get_data_in_ptr() {
+            return data_in;
+        }
+
+        double* get_data_out_ptr() {
+            return data_out;
+        }
+        */
 
 };
 

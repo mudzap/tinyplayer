@@ -1,5 +1,5 @@
 #include "lp.h"
 
-LP::LP(int cutoff_freq, int sampling_freq){
+LP::LP(double cutoff_freq, double sampling_freq){
     
 }

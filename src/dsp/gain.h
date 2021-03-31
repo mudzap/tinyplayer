@@ -7,12 +7,12 @@ class Gain : public Audio_Func {
 
     public:
         
-        Gain(int gain_db);
-        int operator() (int* data);
+        Gain(double gain_db);
+        int operator() (double* data);
 
     private:
 
-        int gain;
+        double gain;
 
 };
 

@@ -9,8 +9,8 @@ class Equalizer : public Audio_Func {
 
     public:
         
-        Equalizer(int* values_db);
-        int operator() (int* data);
+        Equalizer(double* values_db);
+        int operator() (double* data);
 
     private:
 

@@ -1,5 +1,5 @@
 #include "crossfade.h"
 
-XFade::XFade(int gain_db) {
-    
+XFade::XFade(double gain_db) {
+
 }
