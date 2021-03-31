@@ -8,7 +8,7 @@ This is meant as a simple music player easily integrable into my workflow and de
 
 ## Planned features:
 
-* Basic DSP functions
+* Basic DSP functions accessible through a programmable pipeline
 	- LP, HP filters
 	- EQ
 	- Fade in, out
