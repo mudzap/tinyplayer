@@ -13,8 +13,9 @@ This is meant as a simple music player easily integrable into my workflow and de
 	- EQ
 	- Fade in, out
 	- And so on...
-* Playlist handling
-* Tag handling
+* Playlist support
+* Tag support
+* Search by tag, author, fn, etc. support
 * Control commands
 * Wide audio codec support
 * Search function
@@ -23,4 +24,5 @@ This is meant as a simple music player easily integrable into my workflow and de
 ## Non-priority features:
 
 * Streaming capability
+* SIMD instructions for DSP
 * GUI
