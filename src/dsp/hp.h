@@ -3,6 +3,8 @@
 
 #include "audio_func.h"
 
+//Implemented through a biquad filter
+
 class HP : public Audio_Func {
 
     public:
