@@ -12,12 +12,12 @@ file(GLOB_RECURSE SOURCES "src/*.cpp")
 file(GLOB_RECURSE HEADERS "src/*.h")
 
 #DOCS
-find_package(Doxygen)
-if(Doxygen_FOUND)
-  add_subdirectory(docs)
-else()
-  message(STATUS "Doxygen not found, not building docs")
-endif()
+#find_package(Doxygen)
+#if(Doxygen_FOUND)
+#  add_subdirectory(docs)
+#else()
+#  message(STATUS "Doxygen not found, not building docs")
+#endif()
 
 #SOURCE CODE
 add_subdirectory(src)
