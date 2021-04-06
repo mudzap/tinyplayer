@@ -4,7 +4,7 @@
 #include <curses.h>
 
 #include "playlist.h"
-#include "dsp/dsp.h"
+#include "tinydsp/tinydsp.h"
 #include "stream.h"
 #include "buffer.h"
 #include "interface.h"
